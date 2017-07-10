@@ -20,6 +20,12 @@
 			float4 _BorderColor;
 			float2 _GridSize;
 
+			uniform int _GridXLength = 9;
+            uniform float _GridX[9];
+
+            uniform int _GridYLength = 9;
+            uniform float _GridY[9];
+
 			struct vert_input
 			{
 				float4 vertex : POSITION;
@@ -78,11 +84,30 @@
 					return _BorderColor;
 				}
 
-				return tex2D(_MainTex, o.uv);
+				// return tex2D(_MainTex, o.uv);
 
-				// return tex2D(_MainTex, o.uv) * bposition(float2(2,2), uv, _GridSize);
+				float4 color = float4(0,0,0,0);
+
+				float2 relative_uv = 0;
+
+				for (int y = 0; y < 3; y++)
+				{
+					for (int x = 0; x < 3; x++)
+					{
+						if (_GridX[y*3 + x] >= 0 && _GridY[y*3 + x] >= 0)
+						{
+							relative_uv = uv - float2(x,y) * (1/_GridSize);
+							relative_uv += float2(_GridX[y*3 + x],_GridY[y*3 + x]) * (1/_GridSize);
+
+							relative_uv.y = 1 - relative_uv.y;
+
+							color += tex2D(_MainTex, relative_uv) * bposition(float2(x,y), uv, _GridSize);
+						}
+					}
+				}
+
+				return color;
 			}
-
 			ENDCG
 		}
 	}
