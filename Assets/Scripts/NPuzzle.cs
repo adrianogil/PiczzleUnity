@@ -138,9 +138,10 @@ public class NPuzzle : MonoBehaviour {
         RaycastHit hit;
         if (meshCollider.Raycast(ray, out hit, 100.0F))
         {
-            Debug.Log("GilLog - NPuzzle::VerifyTouchInValidGridItem " + hit.textureCoord);
+            // Debug.Log("GilLog - NPuzzle::VerifyTouchInValidGridItem " + hit.textureCoord);
 
             Vector2 uv = hit.textureCoord;
+            lastPoint = hit.point;
 
             lastCoord = uv;
 
@@ -152,7 +153,7 @@ public class NPuzzle : MonoBehaviour {
             selectedPosition.x = Mathf.FloorToInt(uv.x * gridSize.x);
             selectedPosition.y = Mathf.FloorToInt(uv.y * gridSize.y);
 
-            Debug.Log("GilLog - NPuzzle::VerifyTouchInValidGridItem SelectedPosition " + selectedPosition.name);
+            // Debug.Log("GilLog - NPuzzle::VerifyTouchInValidGridItem SelectedPosition " + selectedPosition.name);
 
             if (Mathf.Abs(selectedPosition.x - currentEmptyPosition.x) + Mathf.Abs(selectedPosition.y - currentEmptyPosition.y) == 1)
             {
@@ -175,6 +176,8 @@ public class NPuzzle : MonoBehaviour {
         }
     }
 
+    Vector3 lastPoint;
+
     void MoveCurrentGridItem()
     {
         Vector2 currentMouse = Input.mousePosition;
@@ -186,23 +189,37 @@ public class NPuzzle : MonoBehaviour {
 
             Vector2 uv = hit.textureCoord;
 
-            delta = uv - new Vector2((0.5f + currentSelectedPosition.x)*(1/gridSize.x), 1 - (0.5f + currentSelectedPosition.y)*(1/gridSize.y));
-            
-            delta.y *= -1;
+            // delta = uv - new Vector2((0.5f + currentSelectedPosition.x)*(1/gridSize.x), 1 - (0.5f + currentSelectedPosition.y)*(1/gridSize.y));
+            delta = uv - lastCoord;
+            // delta.y *= -1;
+
+            Vector3 point = hit.point;
+            Vector3 deltaPoint = point - lastPoint;
 
             if (currentEmptyPosition.x == currentSelectedPosition.x)
             {
                 // moveValue += delta.x * Mathf.Sign(currentEmptyPosition.y - currentSelectedPosition.y);
-                moveValue = delta.x;
+                // moveValue += 10f * delta.x * (gridSize.x);
+                moveValue += 2f * deltaPoint.x * (gridSize.x);
+
             } else {
-                moveValue += delta.y * Mathf.Sign(currentEmptyPosition.x - currentSelectedPosition.x);
-                moveValue = delta.y;
+                // moveValue += delta.y * Mathf.Sign(currentEmptyPosition.x - currentSelectedPosition.x);
+                // moveValue += 10f * delta.y * (gridSize.y);
+                moveValue += 2f * deltaPoint.y * (gridSize.y);
             }
             
-            moveValue = Mathf.Clamp01(moveValue);
+            if (moveValue < 0f)
+            {
+                moveValue = 0f;
+            }
+            else if (moveValue > 1f)
+            {
+                moveValue = 1f;
+            }
 
             lastMouse = currentMouse;
             lastCoord = uv;
+            lastPoint = point;
         }
 
         
