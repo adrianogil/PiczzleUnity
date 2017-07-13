@@ -1,7 +1,10 @@
 ﻿Shader "Puzzle/Quad"
 {
 	Properties {
+		_SelectedPosition("Selected Position", Vector) = (-1,-1,0,0)
+		_EmptyPosition("Empty Position", Vector) = (-1,-1,0,0)
 		_GridSize("Grid Size", Vector) = (1,1,0,0)
+		_SelectionMove("Move", Range(0,1)) = 0
 		_BorderSize("Border Size", Float) = 0.05
 		_BorderColor("Border Color", Color) = (0,0,0,1)
 		_MainTex ("Image", 2D) = "white"
@@ -17,8 +20,13 @@
 
 			sampler _MainTex;
 
+			float2 _SelectedPosition;
+			float2 _EmptyPosition;
+
 			float4 _BorderColor;
 			float2 _GridSize;
+
+			float _SelectionMove;
 
 			uniform int _GridXLength = 9;
             uniform float _GridX[9];
@@ -96,14 +104,35 @@
 					{
 						if (_GridX[y*3 + x] >= 0 && _GridY[y*3 + x] >= 0)
 						{
-							relative_uv = uv - float2(x,y) * (1/_GridSize);
-							relative_uv += float2(_GridX[y*3 + x],_GridY[y*3 + x]) * (1/_GridSize);
+							if (_SelectedPosition.x != x || _SelectedPosition.y != y)
+							{
+								relative_uv = uv - float2(x,y) * (1/_GridSize);
+								relative_uv += float2(_GridX[y*3 + x],_GridY[y*3 + x]) * (1/_GridSize);
 
-							relative_uv.y = 1 - relative_uv.y;
+								relative_uv.y = 1 - relative_uv.y;
 
-							color += tex2D(_MainTex, relative_uv) * bposition(float2(x,y), uv, _GridSize);
+								color += tex2D(_MainTex, relative_uv) * bposition(float2(x,y), uv, _GridSize);
+							}
 						}
 					}
+				}
+
+				float2 distance = _EmptyPosition - _SelectedPosition;
+				float2 currentUVPosition = _SelectedPosition + _SelectionMove * distance;
+				currentUVPosition *= (1/_GridSize);
+
+				if (uv.x >= currentUVPosition.x && uv.x <= currentUVPosition.x + (1/_GridSize.x) &&
+					uv.y >= currentUVPosition.y && uv.y <= currentUVPosition.y + (1/_GridSize.y))
+				{
+					relative_uv = float2(_GridX[_SelectedPosition.y*_GridSize.x + _SelectedPosition.x],
+										 _GridY[_SelectedPosition.y*_GridSize.x + _SelectedPosition.x]);
+					relative_uv *= (1/_GridSize);
+
+					relative_uv += (uv - currentUVPosition);
+
+					relative_uv.y = 1 - relative_uv.y;
+
+					color = tex2D(_MainTex, relative_uv);
 				}
 
 				return color;

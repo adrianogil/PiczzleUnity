@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44648892, g: 0.4963268, b: 0.5747255, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.57481706, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -252,7 +252,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 976124254}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.54, y: 0.93, z: 0}
+  m_LocalPosition: {x: 0.67, y: 1.43, z: 0}
   m_LocalScale: {x: 9.235455, y: 10.158894, z: 2.321975}
   m_Children: []
   m_Father: {fileID: 0}
@@ -269,26 +269,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60058a4bd0775496da6c9c91693b1a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridsY:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  gridsX:
-  - 0
-  - 1
-  - 2
-  - 0
-  - 1
-  - 2
-  - 0
-  - 1
-  - 2
+  gridSize:
+    x: 3
+    y: 3
+  currentEmptyPosition:
+    x: 2
+    y: 2
+  positions:
+  - x: 0
+    y: 0
+  - x: 1
+    y: 0
+  - x: 2
+    y: 0
+  - x: 0
+    y: 1
+  - x: 1
+    y: 1
+  - x: 2
+    y: 1
+  - x: 0
+    y: 2
+  - x: 1
+    y: 2
+  - x: -1
+    y: -1
+  currentSelectedPosition:
+    x: -1
+    y: -1
+  movingItem: 0
+  moveValue: 0
 --- !u!1 &1890591740
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,8 +381,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1890591740}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.007189911, y: -0.008402268, z: -0.000060404025, w: -0.99993885}
+  m_LocalPosition: {x: -0.060506582, y: 1.4144056, z: -13.191589}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

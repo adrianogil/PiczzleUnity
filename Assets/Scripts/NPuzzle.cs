@@ -29,12 +29,18 @@ public class NPuzzle : MonoBehaviour {
 
     public bool movingItem = false;
 
-    MeshCollider meshCollider;
+    [Range(0, 1)]
+    public float moveValue;
 
+    MeshCollider meshCollider;
+    MeshRenderer meshRenderer;
+
+
+    Vector2 lastMouse;
 
 	// Use this for initialization
 	void Start () {
-        meshCollider = GetComponent<MeshCollider>();
+        Reset();
 	}
 
 	// Update is called once per frame
@@ -49,6 +55,8 @@ public class NPuzzle : MonoBehaviour {
         {
             MoveCurrentGridItem();
         }
+
+        meshRenderer.sharedMaterial.SetFloat("_SelectionMove", moveValue);
 	}
 
     public void UpdateGrid()
@@ -104,11 +112,26 @@ public class NPuzzle : MonoBehaviour {
                 }
             }
         }    
+
+        currentSelectedPosition = new GridPosition(-1, -1);
+
+
+        meshCollider = GetComponent<MeshCollider>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.sharedMaterial.SetVector("_SelectedPosition", new Vector4(currentSelectedPosition.x,
+                                                                                       currentSelectedPosition.y, 0f, 0f));
+        meshRenderer.sharedMaterial.SetVector("_EmptyPosition", new Vector4(currentEmptyPosition.x,
+                                                                                    currentEmptyPosition.y, 0f, 0f));
+        meshRenderer.sharedMaterial.SetFloat("_SelectionMove", 0f);
+
+        UpdateGrid();
     }
 
     void VerifyTouchInValidGridItem()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        lastMouse = Input.mousePosition;
+
+        Ray ray = Camera.main.ScreenPointToRay(lastMouse);
         RaycastHit hit;
         if (meshCollider.Raycast(ray, out hit, 100.0F))
         {
@@ -127,20 +150,69 @@ public class NPuzzle : MonoBehaviour {
             {
                 currentSelectedPosition = selectedPosition;
 
+                // int index = selectedPosition.y * gridSize.x + selectedPosition.x;
+
+                // positions[index] = new GridPosition() { x = -1, y = -1};
+
                 movingItem = true;
+                moveValue = 0f;
+
+                meshRenderer.sharedMaterial.SetVector("_SelectedPosition", new Vector4(currentSelectedPosition.x,
+                                                                                       currentSelectedPosition.y, 0f, 0f));
+                meshRenderer.sharedMaterial.SetVector("_EmptyPosition", new Vector4(currentEmptyPosition.x,
+                                                                                    currentEmptyPosition.y, 0f, 0f));
+
+                UpdateGrid();
             }
         }
     }
 
     void MoveCurrentGridItem()
     {
+        Vector2 currentMouse = Input.mousePosition;
+        Vector2 delta =  currentMouse - lastMouse;
 
+        if (currentEmptyPosition.x == currentSelectedPosition.x)
+        {
+            moveValue += delta.x * Mathf.Sign(currentEmptyPosition.y - currentSelectedPosition.y);
+        } else {
+            moveValue += delta.y * Mathf.Sign(currentEmptyPosition.x - currentSelectedPosition.x);
+        }
+        
+        moveValue = Mathf.Clamp01(moveValue);
+
+        lastMouse = currentMouse;
+    }
+
+    int GetIndex(GridPosition p)
+    {
+        return p.y * gridSize.x + p.x;
     }
 
     void ReleaseCurrentGridItem()
     {
+        float finalMove = Mathf.Round(moveValue);
+        moveValue = 0f;
+
+        if (finalMove == 0f)
+        {
+
+        } else if (finalMove == 1f)
+        {
+            positions[GetIndex(currentEmptyPosition)] = positions[GetIndex(currentSelectedPosition)];
+            positions[GetIndex(currentSelectedPosition)] = new GridPosition(-1, -1);
+            currentEmptyPosition = currentSelectedPosition;
+        }
+
         currentSelectedPosition = new GridPosition(-1,-1);
         movingItem = false;
+
+        meshRenderer.sharedMaterial.SetVector("_SelectedPosition", new Vector4(currentSelectedPosition.x,
+                                                                                       currentSelectedPosition.y, 0f, 0f));
+        meshRenderer.sharedMaterial.SetVector("_EmptyPosition", new Vector4(currentEmptyPosition.x,
+                                                                                    currentEmptyPosition.y, 0f, 0f));
+
+        UpdateGrid();
     }
 }
 
