@@ -36,7 +36,10 @@ public class NPuzzle : MonoBehaviour {
     MeshRenderer meshRenderer;
 
 
-    Vector2 lastMouse;
+    public Vector2 lastMouse;
+    public Vector2 delta;
+
+    public Vector2 lastCoord;
 
 	// Use this for initialization
 	void Start () {
@@ -138,7 +141,12 @@ public class NPuzzle : MonoBehaviour {
             Debug.Log("GilLog - NPuzzle::VerifyTouchInValidGridItem " + hit.textureCoord);
 
             Vector2 uv = hit.textureCoord;
+
+            lastCoord = uv;
+
             uv.y = 1 - uv.y; // Reverse because Texture is mapped from bottom to top
+
+
 
             GridPosition selectedPosition = new GridPosition();
             selectedPosition.x = Mathf.FloorToInt(uv.x * gridSize.x);
@@ -170,18 +178,34 @@ public class NPuzzle : MonoBehaviour {
     void MoveCurrentGridItem()
     {
         Vector2 currentMouse = Input.mousePosition;
-        Vector2 delta =  currentMouse - lastMouse;
-
-        if (currentEmptyPosition.x == currentSelectedPosition.x)
+        Ray ray = Camera.main.ScreenPointToRay(currentMouse);
+        RaycastHit hit;
+        if (meshCollider.Raycast(ray, out hit, 100.0F))
         {
-            moveValue += delta.x * Mathf.Sign(currentEmptyPosition.y - currentSelectedPosition.y);
-        } else {
-            moveValue += delta.y * Mathf.Sign(currentEmptyPosition.x - currentSelectedPosition.x);
-        }
-        
-        moveValue = Mathf.Clamp01(moveValue);
+            Debug.Log("GilLog - NPuzzle::MoveCurrentGridItem " + hit.textureCoord);
 
-        lastMouse = currentMouse;
+            Vector2 uv = hit.textureCoord;
+
+            delta = uv - new Vector2((0.5f + currentSelectedPosition.x)*(1/gridSize.x), 1 - (0.5f + currentSelectedPosition.y)*(1/gridSize.y));
+            
+            delta.y *= -1;
+
+            if (currentEmptyPosition.x == currentSelectedPosition.x)
+            {
+                // moveValue += delta.x * Mathf.Sign(currentEmptyPosition.y - currentSelectedPosition.y);
+                moveValue = delta.x;
+            } else {
+                moveValue += delta.y * Mathf.Sign(currentEmptyPosition.x - currentSelectedPosition.x);
+                moveValue = delta.y;
+            }
+            
+            moveValue = Mathf.Clamp01(moveValue);
+
+            lastMouse = currentMouse;
+            lastCoord = uv;
+        }
+
+        
     }
 
     int GetIndex(GridPosition p)
