@@ -7,6 +7,7 @@
 		_SelectionMove("Move", Range(0,1)) = 0
 		_BorderSize("Border Size", Float) = 0.05
 		_BorderColor("Border Color", Color) = (0,0,0,1)
+		_BorderSelectedColor("Selected Border Color", Color) = (0,0,0,1)
 		_MainTex ("Image", 2D) = "white"
 	}
 
@@ -24,6 +25,7 @@
 			float2 _EmptyPosition;
 
 			float4 _BorderColor;
+			float4 _BorderSelectedColor;
 			float2 _GridSize;
 
 			float _SelectionMove;
@@ -87,11 +89,6 @@
 				float2 uv = o.uv;
 				uv.y = 1 - uv.y;
 
-				if ((uv.x > 0.05 && frac(uv.x * _GridSize.x) < 0.05) || (uv.y > 0.05 && frac(uv.y * _GridSize.y) < 0.05))
-				{
-					return _BorderColor;
-				}
-
 				// return tex2D(_MainTex, o.uv);
 
 				float4 color = float4(0,0,0,0);
@@ -132,7 +129,17 @@
 
 					relative_uv.y = 1 - relative_uv.y;
 
-					color = tex2D(_MainTex, relative_uv);
+					if ((relative_uv.x > 0.05 && frac(relative_uv.x * _GridSize.x) < 0.05) || (relative_uv.y > 0.05 && frac(relative_uv.y * _GridSize.y) < 0.05))
+					{
+						return _BorderSelectedColor;
+					}
+
+					return tex2D(_MainTex, relative_uv);
+				}
+
+				if ((uv.x > 0.05 && frac(uv.x * _GridSize.x) < 0.05) || (uv.y > 0.05 && frac(uv.y * _GridSize.y) < 0.05))
+				{
+					return _BorderColor;
 				}
 
 				return color;
