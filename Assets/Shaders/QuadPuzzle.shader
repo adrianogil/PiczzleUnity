@@ -125,11 +125,14 @@
 										 _GridY[_SelectedPosition.y*_GridSize.x + _SelectedPosition.x]);
 					relative_uv *= (1/_GridSize);
 
-					relative_uv += (uv - currentUVPosition);
+					float2 relative_uv_position = (uv - currentUVPosition);
+					relative_uv += relative_uv_position;
 
 					relative_uv.y = 1 - relative_uv.y;
 
-					if ((relative_uv.x > 0.05 && frac(relative_uv.x * _GridSize.x) < 0.05) || (relative_uv.y > 0.05 && frac(relative_uv.y * _GridSize.y) < 0.05))
+					relative_uv_position /= (1/_GridSize);
+
+					if (relative_uv_position.x <= 0.05 || relative_uv_position.x >= 0.95 || relative_uv_position.y <= 0.05 || relative_uv_position.y >= 0.95)
 					{
 						return _BorderSelectedColor;
 					}
